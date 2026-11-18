@@ -19,7 +19,7 @@ Update this file in the same commit as the work. Status: ⬜ todo · 🟡 in pro
 | 1 | Data loading + EDA | ✅ | Gagan | `scripts/01_eda.py` → inventory, summary, 5 figures, 5 Folium maps |
 | 2 | Labels + candidates | ✅ | Gagan | `scripts/02_labels_candidates.py`; R=50 m, K=12; 2 trips flagged unreliable |
 | 3 | Feature engineering | ✅ | Gagan | `scripts/03_features.py`; 26 features, 1.34M train / 147k test rows |
-| 4 | Model experiments (≥5) | ⬜ | | |
+| 4 | Model experiments (≥5) | ✅ | Gagan | 8 models, 7 families; **XGBoost selected** |
 | 5 | Bayesian HPO | ⬜ | | |
 | 6 | HMM + Viterbi | ⬜ | | |
 | 7 | Artifacts | ⬜ | | |
@@ -40,6 +40,8 @@ Update this file in the same commit as the work. Status: ⬜ todo · 🟡 in pro
 | 2026-11-18 | Folium base map = OpenStreetMap tiles | CartoDB tiles now require an API key |
 | 2026-11-18 | Problem framed as **binary candidate classification** (is this candidate the reference arc?), Top-1 = argmax score per point | fixed-size label space doesn't exist (arc ids are per-trip); gives P(arc) per candidate = HMM emission |
 | 2026-11-18 | Features exclude lon/lat, timestamps, trip ids | prevent memorising locations; same code runs in API at inference |
+| 2026-11-18 | CV = 5-fold GroupKFold by trip (shuffle, seed 42) on 78 reliable trips; same folds reused in Phases 5–6 (`experiment.cv_splits`) | no trip leaks between fit and validation; identical folds make tuned/untuned comparable |
+| 2026-11-18 | **Final model family: XGBoost** | best CV macro-F1 (0.9369), CV Top-1 (0.8863), test Top-1 (0.8970) and lowest log loss (CV 0.082, test 0.073) — calibrated probabilities matter because they become HMM emissions; fast inference (3.9 ms / 1k points). LightGBM within noise but its validation loss rises after ~150 rounds |
 | 2026-11-18 | Missing heading (stationary, <2 m move) → `heading_cos=0`, `heading_diff=90`, `heading_valid=0`; edge neighbours clipped | neutral fill works for every model family (LogReg/KNN/MLP can't take NaN) |
 
 ## Data-quality findings
@@ -82,6 +84,21 @@ Source of truth: `experiments/results/`.
 - Point-level context features (`speed`, `dt_*`, `min_dist`, `second_gap`) are ~0.5 alone — they only help through interactions.
 - Rule-based Top-1 (no learning, all GPS points): nearest arc **49.5% train / 53.7% test** (two-way twins tie); nearest + heading **72.1% / 82.6%**. ML models must beat these.
 
+**Phase 4 — model comparison** (`experiments/results/phase4/comparison.md`, figures `reports/figures/models_*.png`)
+
+| Model | Family | CV macro-F1 | CV Top-1 | Test Top-1 | Test macro-F1 | Test log loss | Continuity | Fit s/fold | Infer ms/1k pts |
+|---|---|---|---|---|---|---|---|---|---|
+| logreg | Linear | 0.9292 ± 0.0111 | 0.8795 | 0.8764 | 0.9235 | 0.0985 | 0.9339 | 0.7 | 0.1 |
+| gnb | Probabilistic | 0.8708 ± 0.0155 | 0.8574 | 0.8618 | 0.8673 | 0.4773 | 0.9239 | 0.1 | 0.3 |
+| knn | Instance-based | 0.9245 ± 0.0117 | 0.8717 | 0.8745 | 0.9199 | 0.1295 | 0.9296 | ~0 (lazy) | 214.9 |
+| dtree | Tree | 0.9313 ± 0.0121 | 0.8792 | 0.8837 | 0.9305 | 0.0864 | 0.9346 | 11.3 | 0.2 |
+| rf | Bagging | 0.9364 ± 0.0113 | 0.8841 | 0.8859 | 0.9328 | 0.0769 | 0.9364 | 24.9 | 6.8 |
+| lgbm | Boosting | 0.9359 ± 0.0127 | 0.8839 | 0.8945 | 0.9360 | 0.0765 | 0.9378 | 8.7 | 17.3 |
+| **xgb** | Boosting | **0.9369 ± 0.0127** | **0.8863** | **0.8970** | **0.9375** | **0.0731** | 0.9414 | 6.9 | 3.9 |
+| mlp | Neural net | 0.9328 ± 0.0117 | 0.8830 | 0.8890 | 0.9309 | 0.0801 | 0.9423 | 12.1 | 0.7 |
+
+Observations: every model beats the 0.826 rule baseline; fold-to-fold Top-1 spread (≈0.84–0.92) is larger than the gap between the top 4 models; GNB is badly calibrated (log loss 0.48, correlated distance features violate independence); KNN trained on a 60k subsample and is the slowest at inference; loss curves show LightGBM validation loss rising after ~150 rounds and the MLP's after ~4 epochs (mild overfitting), XGBoost's flat.
+
 K=2/4 miss a lot because every two-way street contributes two arcs (one per direction) at identical distance — direction must be decided by features (heading), not distance.
 
 ## Log
@@ -90,3 +107,4 @@ K=2/4 miss a lot because every two-way street contributes two arcs (one per dire
 - **2026-11-18** — Phase 1 done: loaders (`io.py`), per-trip projection (`geo.py`), network stats (`network.py`), Folium builder (`viz.py`), EDA script + outputs. Next: Phase 2 labels + candidates.
 - **2026-11-18** — Phase 2 done: `labels.py` (monotone DP alignment, ~0.3 s/trip), `candidates.py` (KD-tree over ≤20 m arc pieces, verified identical to brute force), miss-rate grid + figures, label-assignment map (`reports/maps/labels_trip_00000095.html`). Next: Phase 3 features.
 - **2026-11-18** — Phase 3 done: `features.py` (26 inference-safe features), feature tables cached as parquet (~15 s for all 90 trips), univariate AUC / class-distribution / correlation figures, rule-based baselines. Next: Phase 4 model experiments.
+- **2026-11-18** — Phase 4 done: `models.py` (8-model zoo, loss histories for LGBM/XGB/MLP), `metrics.py`, `experiment.py`, `04_model_experiments.py` + `04b_model_plots.py`; XGBoost selected. Phase 5 search launched.
