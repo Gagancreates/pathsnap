@@ -47,8 +47,21 @@ Or run individual steps:
 | 4. Model comparison | `python scripts/04_model_experiments.py` (`--models xgb,lgbm` for a subset), then `python scripts/04b_model_plots.py` | `experiments/results/phase4/`, `reports/figures/models_*.png`, `cache/{preds,models}/` |
 | 5. Bayesian HPO | `python scripts/05_bayesian_hpo.py --trials 40` (resumable) | `experiments/results/phase5/`, `reports/figures/hpo_*.png`, `cache/{preds,models}/xgb_{tuned,untuned}*` |
 | 6. HMM + Viterbi | `python scripts/06_hmm_viterbi.py --model xgb_untuned --maps` (also `--model xgb_tuned`) | `experiments/results/phase6/<model>/`, `reports/figures/hmm_*.png`, `reports/maps/hmm_trip_*.html` |
+| 7. Export artifacts | `python scripts/07_export_artifacts.py` | `artifacts/xgb_final.json`, `artifacts/pipeline_config.json`, `experiments/results/phase7/verification.csv` |
 
-_(more steps are added as phases land — see TRACKER.md)_
+## API (Laptop 1)
+
+The API needs only `artifacts/` and the trip folders; no training data or cache.
+
+```bash
+PATHSNAP_EVAL_DIR=data/eval_test uvicorn api.main:app --host 0.0.0.0 --port 8000
+```
+
+- `GET /health` — model and data status
+- `GET /trips` — trip ids in `PATHSNAP_EVAL_DIR`
+- `POST /predict` with `{"trip_id": "..."}` — runs the full pipeline and returns GPS points, the predicted route as `[lat, lon]` polylines, server-side metrics (Top-1, route precision/recall/F1, continuity) and timings. The reference route is never returned.
+
+Every request is logged to the console (time, endpoint, client IP, status, latency, per-trip metrics). For development, point it at `data/student_test`. Find Laptop 1's LAN IP with `ipconfig getifaddr en0` (macOS) and allow incoming connections on port 8000 if the firewall asks.
 
 ## Repository layout
 

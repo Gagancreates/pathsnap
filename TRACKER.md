@@ -22,8 +22,8 @@ Update this file in the same commit as the work. Status: ⬜ todo · 🟡 in pro
 | 4 | Model experiments (≥5) | ✅ | Gagan | 8 models, 7 families; **XGBoost selected** |
 | 5 | Bayesian HPO | ✅ | Gagan | Optuna TPE, 40 trials; gain within noise |
 | 6 | HMM + Viterbi | ✅ | Gagan | Top-1 0.897 → **0.955** on student_test; final = untuned XGB + HMM |
-| 7 | Artifacts | ⬜ | | |
-| 8 | FastAPI backend | ⬜ | | |
+| 7 | Artifacts | ✅ | Gagan | `artifacts/xgb_final.json` + `pipeline_config.json`; raw-file run reproduces 0.9552 |
+| 8 | FastAPI backend | ✅ | Gagan | `/health`, `/trips`, `/predict`; tested on all 10 student_test trips |
 | 9 | UI | ⬜ | | |
 | 10 | Integration test | ⬜ | | |
 | 11 | Report | ⬜ | | |
@@ -46,6 +46,8 @@ Update this file in the same commit as the work. Status: ⬜ todo · 🟡 in pro
 | 2026-11-18 | HMM: states = candidate arcs; emission = alpha·log P(classifier); transition = −|route dist − GPS dist|/beta (Newson–Krumm), directed bounded Dijkstra ≤ 1 km; unreachable → −30; gap > gap_s → uniform transition (chain split); points without candidates skipped | uses the classifier's calibrated probabilities and the road graph's direction/connectivity; never dead-ends |
 | 2026-11-18 | Decoder params tuned on train out-of-fold predictions only: alpha 1.0, beta 2.0 m, gap_s 120 s | grid of 12 (alpha × beta) + 3 gap values; student_test only scored afterwards |
 | 2026-11-18 | **Final pipeline = untuned XGBoost + HMM** | after decoding, untuned beats tuned on train OOF Top-1 (0.9323 vs 0.9312) — the selection set — and student_test agrees (0.9552 vs 0.9528); also 2× faster inference and better log loss |
+| 2026-11-18 | Model saved as XGBoost native JSON (not pickle) + a JSON pipeline config | portable across Python/xgboost minor versions on the demo laptop; config holds every inference setting in one place |
+| 2026-11-18 | API never returns the reference route — only metrics; prediction loads trips with `with_route=False`, scoring reads `.route` afterwards | brief: ground truth must stay server-side and never reach the model or UI |
 | 2026-11-18 | Missing heading (stationary, <2 m move) → `heading_cos=0`, `heading_diff=90`, `heading_valid=0`; edge neighbours clipped | neutral fill works for every model family (LogReg/KNN/MLP can't take NaN) |
 
 ## Data-quality findings
@@ -141,3 +143,4 @@ K=2/4 miss a lot because every two-way street contributes two arcs (one per dire
 - **2026-11-18** — Phase 4 done: `models.py` (8-model zoo, loss histories for LGBM/XGB/MLP), `metrics.py`, `experiment.py`, `04_model_experiments.py` + `04b_model_plots.py`; XGBoost selected. Phase 5 search launched.
 - **2026-11-18** — Phase 5 done: `05_bayesian_hpo.py` (Optuna study in `optuna_xgb.db`, trials.csv, importance, tuned-vs-untuned). Tuning gain within noise. Phase 6 running for both models.
 - **2026-11-18** — Phase 6 done: `hmm.py` (bounded Dijkstra route graph, lattice, Viterbi, route reconstruction, route overlap), `06_hmm_viterbi.py` (OOF predictions, decoder grid, classifier-vs-HMM, maps). Final pipeline = untuned XGBoost + HMM. Next: Phase 7 artifacts + Phase 8 API.
+- **2026-11-18** — Phases 7–8 done: `pipeline.py` (raw files → features → XGBoost → HMM → route; separate server-side scoring), `07_export_artifacts.py` (end-to-end check reproduces student_test Top-1 0.9552, 33–512 ms/trip), `api/main.py` (FastAPI with request logging). Next: Phase 9 UI.
