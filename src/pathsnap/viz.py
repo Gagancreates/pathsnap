@@ -55,7 +55,7 @@ def trip_map(trip: Trip, net: RoadNetwork | None = None, predicted_arcs=None, sh
              show_network: bool = True, max_gps_points: int = 3000, title: str | None = None) -> folium.Map:
     net = net or RoadNetwork.from_trip(trip)
     tr = trip.track
-    m = folium.Map(tiles="cartodbpositron", control_scale=True)
+    m = folium.Map(tiles="OpenStreetMap", control_scale=True)
     m.fit_bounds([[tr.lat.min(), tr.lon.min()], [tr.lat.max(), tr.lon.max()]], padding=(20, 20))
     layers = []
 

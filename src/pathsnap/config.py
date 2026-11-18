@@ -15,3 +15,8 @@ ARTIFACTS_DIR = REPO_ROOT / "artifacts"
 CACHE_DIR = REPO_ROOT / "cache"
 
 SEED = 42
+
+# Candidate generation (chosen in Phase 2 from experiments/results/candidate_miss_rate.csv)
+CAND_RADIUS_M = 50.0
+CAND_K = 12
+UNRELIABLE_TRIPS_RULE_M = 50.0  # trips whose median point→label distance exceeds this are excluded from training

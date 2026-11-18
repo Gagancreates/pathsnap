@@ -22,6 +22,7 @@ Place the dataset under `data/` as described in [data/README.md](data/README.md)
 | Step | Command | Output |
 |------|---------|--------|
 | 1. EDA | `python scripts/01_eda.py` | `experiments/results/eda_*`, `reports/figures/eda_*.png`, `reports/maps/eda_trip_*.html` |
+| 2. Labels + candidates | `python scripts/02_labels_candidates.py` | `cache/labels/*.npz`, `experiments/results/{labels_trip_summary,candidate_miss_rate}.csv`, `reports/figures/{cand,labels}_*.png` |
 
 _(more steps are added as phases land — see TRACKER.md)_
 
@@ -40,4 +41,4 @@ data/              local dataset (not committed)
 
 ## AI assistance
 
-Parts of this repository were written with AI assistance (Claude); such commits carry a `Co-Authored-By` trailer. All experiments are run by the team and every reported number is produced by committed code.
+Parts of this repository were written with AI assistance (Claude). All experiments are run by the team and every reported number is produced by committed code.

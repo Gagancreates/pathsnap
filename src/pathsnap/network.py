@@ -81,6 +81,15 @@ def point_segment_distance(p: np.ndarray, a: np.ndarray, b: np.ndarray):
     return np.hypot(*(p[:, None, :] - proj).transpose(2, 0, 1)), t
 
 
+def point_segment_distance_paired(p: np.ndarray, a: np.ndarray, b: np.ndarray):
+    """Row-wise distance from p[i] to segment a[i]->b[i]. Returns (dist, t), each (N,)."""
+    ab = b - a
+    ab2 = np.maximum((ab ** 2).sum(-1), 1e-12)
+    t = np.clip(((p - a) * ab).sum(-1) / ab2, 0.0, 1.0)
+    proj = a + t[:, None] * ab
+    return np.hypot(*(p - proj).T), t
+
+
 def min_distance_to_arcs(p: np.ndarray, net: RoadNetwork, arc_ids: np.ndarray, chunk: int = 2048) -> np.ndarray:
     """For each point, the distance to the nearest of the given arcs (metres)."""
     a, b = net.a_xy[arc_ids], net.b_xy[arc_ids]
