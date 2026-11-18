@@ -7,7 +7,7 @@ Update this file in the same commit as the work. Status: ⬜ todo · 🟡 in pro
 | Member | GitHub | Focus |
 |--------|--------|-------|
 | Gagan | @Gagancreates | setup, data pipeline |
-| TBD | | |
+| Dhruv Purushotham |@dhruvpurushotham1718-ui |Dataset Documentation|
 | TBD | | |
 | TBD | | |
 
