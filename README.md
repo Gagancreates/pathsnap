@@ -45,6 +45,7 @@ Or run individual steps:
 | 2. Labels + candidates | `python scripts/02_labels_candidates.py` | `cache/labels/*.npz`, `experiments/results/{labels_trip_summary,candidate_miss_rate}.csv`, `reports/figures/{cand,labels}_*.png` |
 | 3. Features | `python scripts/03_features.py` | `cache/features/*.parquet`, `experiments/results/{feature_*,heuristic_baselines}.*`, `reports/figures/feat_*.png` |
 | 4. Model comparison | `python scripts/04_model_experiments.py` (`--models xgb,lgbm` for a subset), then `python scripts/04b_model_plots.py` | `experiments/results/phase4/`, `reports/figures/models_*.png`, `cache/{preds,models}/` |
+| 5. Bayesian HPO | `python scripts/05_bayesian_hpo.py --trials 40` (resumable) | `experiments/results/phase5/`, `reports/figures/hpo_*.png`, `cache/{preds,models}/xgb_{tuned,untuned}*` |
 
 _(more steps are added as phases land — see TRACKER.md)_
 

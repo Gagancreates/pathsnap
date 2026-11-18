@@ -20,7 +20,7 @@ Update this file in the same commit as the work. Status: ⬜ todo · 🟡 in pro
 | 2 | Labels + candidates | ✅ | Gagan | `scripts/02_labels_candidates.py`; R=50 m, K=12; 2 trips flagged unreliable |
 | 3 | Feature engineering | ✅ | Gagan | `scripts/03_features.py`; 26 features, 1.34M train / 147k test rows |
 | 4 | Model experiments (≥5) | ✅ | Gagan | 8 models, 7 families; **XGBoost selected** |
-| 5 | Bayesian HPO | ⬜ | | |
+| 5 | Bayesian HPO | ✅ | Gagan | Optuna TPE, 40 trials; gain within noise |
 | 6 | HMM + Viterbi | ⬜ | | |
 | 7 | Artifacts | ⬜ | | |
 | 8 | FastAPI backend | ⬜ | | |
@@ -42,6 +42,7 @@ Update this file in the same commit as the work. Status: ⬜ todo · 🟡 in pro
 | 2026-11-18 | Features exclude lon/lat, timestamps, trip ids | prevent memorising locations; same code runs in API at inference |
 | 2026-11-18 | CV = 5-fold GroupKFold by trip (shuffle, seed 42) on 78 reliable trips; same folds reused in Phases 5–6 (`experiment.cv_splits`) | no trip leaks between fit and validation; identical folds make tuned/untuned comparable |
 | 2026-11-18 | **Final model family: XGBoost** | best CV macro-F1 (0.9369), CV Top-1 (0.8863), test Top-1 (0.8970) and lowest log loss (CV 0.082, test 0.073) — calibrated probabilities matter because they become HMM emissions; fast inference (3.9 ms / 1k points). LightGBM within noise but its validation loss rises after ~150 rounds |
+| 2026-11-18 | Bayesian HPO: Optuna TPE (seed 42, 10 random start-up trials, median pruner), objective = mean CV Top-1 on the Phase 4 folds, trial 0 = untuned config | objective matches the primary metric; same folds keep tuned vs untuned comparable; student_test untouched during search |
 | 2026-11-18 | Missing heading (stationary, <2 m move) → `heading_cos=0`, `heading_diff=90`, `heading_valid=0`; edge neighbours clipped | neutral fill works for every model family (LogReg/KNN/MLP can't take NaN) |
 
 ## Data-quality findings
@@ -99,6 +100,17 @@ Source of truth: `experiments/results/`.
 
 Observations: every model beats the 0.826 rule baseline; fold-to-fold Top-1 spread (≈0.84–0.92) is larger than the gap between the top 4 models; GNB is badly calibrated (log loss 0.48, correlated distance features violate independence); KNN trained on a 60k subsample and is the slowest at inference; loss curves show LightGBM validation loss rising after ~150 rounds and the MLP's after ~4 epochs (mild overfitting), XGBoost's flat.
 
+**Phase 5 — Bayesian optimisation of XGBoost** (`experiments/results/phase5/`, figures `reports/figures/hpo_*.png`)
+
+40 trials (0 pruned), 51 min of trial time. Best = trial 39: n_estimators 1000, learning_rate 0.094, max_depth 6, min_child_weight 2.77, subsample 0.83, colsample_bytree 0.45, gamma 0.18, reg_lambda 1.08, reg_alpha 4.7e-4. Most influential (fANOVA): learning_rate 0.25, subsample 0.18, min_child_weight 0.16, n_estimators 0.16; max_depth 0.01.
+
+| Model | CV Top-1 | CV macro-F1 | CV log loss | Test Top-1 | Test macro-F1 | Test log loss | Continuity | Infer ms/1k pts |
+|---|---|---|---|---|---|---|---|---|
+| Untuned | 0.8863 ± 0.034 | 0.9369 | 0.0824 | 0.8970 | 0.9375 | 0.0731 | 0.9414 | 6.2 |
+| Tuned | 0.8871 ± 0.035 | 0.9360 | 0.0850 | 0.8968 | 0.9365 | 0.0739 | 0.9418 | 13.1 |
+
+Tuning did **not** meaningfully outperform: +0.08 pp CV Top-1 (fold std ±3.4 pp), test level, log loss slightly worse, inference 2× slower. The search surface is flat — the classifier is limited by features/ambiguity, not hyperparameters. Both are carried into Phase 6 to compare after decoding.
+
 K=2/4 miss a lot because every two-way street contributes two arcs (one per direction) at identical distance — direction must be decided by features (heading), not distance.
 
 ## Log
@@ -108,3 +120,4 @@ K=2/4 miss a lot because every two-way street contributes two arcs (one per dire
 - **2026-11-18** — Phase 2 done: `labels.py` (monotone DP alignment, ~0.3 s/trip), `candidates.py` (KD-tree over ≤20 m arc pieces, verified identical to brute force), miss-rate grid + figures, label-assignment map (`reports/maps/labels_trip_00000095.html`). Next: Phase 3 features.
 - **2026-11-18** — Phase 3 done: `features.py` (26 inference-safe features), feature tables cached as parquet (~15 s for all 90 trips), univariate AUC / class-distribution / correlation figures, rule-based baselines. Next: Phase 4 model experiments.
 - **2026-11-18** — Phase 4 done: `models.py` (8-model zoo, loss histories for LGBM/XGB/MLP), `metrics.py`, `experiment.py`, `04_model_experiments.py` + `04b_model_plots.py`; XGBoost selected. Phase 5 search launched.
+- **2026-11-18** — Phase 5 done: `05_bayesian_hpo.py` (Optuna study in `optuna_xgb.db`, trials.csv, importance, tuned-vs-untuned). Tuning gain within noise. Phase 6 running for both models.
