@@ -17,6 +17,17 @@ pip install -r requirements.txt && pip install -e .
 
 Place the dataset under `data/` as described in [data/README.md](data/README.md) (symlinks are fine), or set `PATHSNAP_DATA=/path/to/data`.
 
+## Dataset
+
+Each trip contains four header-less, whitespace-separated files:
+
+| File | Contents |
+|---|---|
+| `.track` | GPS observations containing longitude (`lon`), latitude (`lat`), and timestamp (`t`) in seconds. |
+| `.nodes` | Road network node coordinates containing longitude (`lon`) and latitude (`lat`). Row index represents the node ID. |
+| `.arcs` | Directed road segments containing source node (`u`) and destination node (`v`). Row index represents the arc ID. |
+| `.route` | Ordered sequence of arc IDs representing the reference route taken by the trip. |
+
 ## Run
 
 | Step | Command | Output |
