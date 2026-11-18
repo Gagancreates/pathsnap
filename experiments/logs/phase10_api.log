@@ -1,0 +1,125 @@
+14:50:03  INFO  model loaded: XGBClassifier | eval dir: /Users/gagan/sem5/ML/hackathon/Student folder/student_test
+INFO:     Started server process [49409]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+14:50:04  INFO  GET / from 127.0.0.1 -> 404 (1 ms)
+INFO:     127.0.0.1:60751 - "GET / HTTP/1.1" 404 Not Found
+14:50:04  INFO  HEAD / from 127.0.0.1 -> 404 (1 ms)
+INFO:     127.0.0.1:60752 - "HEAD / HTTP/1.1" 404 Not Found
+14:50:04  INFO  GET /favicon.ico from 127.0.0.1 -> 404 (0 ms)
+INFO:     127.0.0.1:60751 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+14:50:07  INFO  GET /health from 127.0.0.1 -> 200 (1 ms)
+INFO:     127.0.0.1:60768 - "GET /health HTTP/1.1" 200 OK
+14:50:07  INFO  GET /trips from 127.0.0.1 -> 200 (0 ms)
+INFO:     127.0.0.1:60770 - "GET /trips HTTP/1.1" 200 OK
+14:50:16  INFO  GET /health from 127.0.0.1 -> 200 (1 ms)
+INFO:     127.0.0.1:60774 - "GET /health HTTP/1.1" 200 OK
+14:50:16  INFO  GET /trips from 127.0.0.1 -> 200 (1 ms)
+INFO:     127.0.0.1:60776 - "GET /trips HTTP/1.1" 200 OK
+14:50:16  INFO  predict trip 00000000: running pipeline
+14:50:16  INFO  predict trip 00000000: 2503 points, 196 route arcs, top1=0.9804, route_f1=0.9969, 209 ms
+14:50:16  INFO  POST /predict from 127.0.0.1 -> 200 (293 ms)
+INFO:     127.0.0.1:60778 - "POST /predict HTTP/1.1" 200 OK
+14:50:45  INFO  GET /health from 127.0.0.1 -> 200 (2 ms)
+INFO:     127.0.0.1:60810 - "GET /health HTTP/1.1" 200 OK
+14:50:45  INFO  GET /trips from 127.0.0.1 -> 200 (0 ms)
+INFO:     127.0.0.1:60812 - "GET /trips HTTP/1.1" 200 OK
+14:50:52  INFO  GET /health from 127.0.0.1 -> 200 (1 ms)
+INFO:     127.0.0.1:60814 - "GET /health HTTP/1.1" 200 OK
+14:50:52  INFO  GET /trips from 127.0.0.1 -> 200 (0 ms)
+INFO:     127.0.0.1:60816 - "GET /trips HTTP/1.1" 200 OK
+14:50:52  INFO  predict trip 00000000: running pipeline
+14:50:53  INFO  predict trip 00000000: 2503 points, 196 route arcs, top1=0.9804, route_f1=0.9969, 207 ms
+14:50:53  INFO  POST /predict from 127.0.0.1 -> 200 (255 ms)
+INFO:     127.0.0.1:60818 - "POST /predict HTTP/1.1" 200 OK
+14:50:53  INFO  predict trip 00000007: running pipeline
+14:50:53  INFO  predict trip 00000007: 1354 points, 121 route arcs, top1=1.0000, route_f1=0.9965, 72 ms
+14:50:53  INFO  POST /predict from 127.0.0.1 -> 200 (94 ms)
+INFO:     127.0.0.1:60822 - "POST /predict HTTP/1.1" 200 OK
+14:50:53  INFO  predict trip 00000009: running pipeline
+14:50:53  INFO  predict trip 00000009: 1049 points, 446 route arcs, top1=0.9209, route_f1=0.9733, 227 ms
+14:50:53  INFO  POST /predict from 127.0.0.1 -> 200 (259 ms)
+INFO:     127.0.0.1:60824 - "POST /predict HTTP/1.1" 200 OK
+14:50:53  INFO  predict trip 00000040: running pipeline
+14:50:53  INFO  predict trip 00000040: 2995 points, 327 route arcs, top1=0.9793, route_f1=0.9996, 224 ms
+14:50:53  INFO  POST /predict from 127.0.0.1 -> 200 (284 ms)
+INFO:     127.0.0.1:60826 - "POST /predict HTTP/1.1" 200 OK
+14:50:53  INFO  predict trip 00000052: running pipeline
+14:50:53  INFO  predict trip 00000052: 262 points, 93 route arcs, top1=1.0000, route_f1=0.9984, 32 ms
+14:50:53  INFO  POST /predict from 127.0.0.1 -> 200 (39 ms)
+INFO:     127.0.0.1:60828 - "POST /predict HTTP/1.1" 200 OK
+14:50:53  INFO  predict trip 00000056: running pipeline
+14:50:54  INFO  predict trip 00000056: 3958 points, 1339 route arcs, top1=0.9661, route_f1=0.9860, 453 ms
+14:50:54  INFO  POST /predict from 127.0.0.1 -> 200 (634 ms)
+INFO:     127.0.0.1:60830 - "POST /predict HTTP/1.1" 200 OK
+14:50:54  INFO  predict trip 00000065: running pipeline
+14:50:54  INFO  predict trip 00000065: 768 points, 151 route arcs, top1=0.8932, route_f1=0.9912, 145 ms
+14:50:54  INFO  POST /predict from 127.0.0.1 -> 200 (167 ms)
+INFO:     127.0.0.1:60832 - "POST /predict HTTP/1.1" 200 OK
+14:50:54  INFO  predict trip 00000076: running pipeline
+14:50:55  INFO  predict trip 00000076: 1486 points, 400 route arcs, top1=0.9818, route_f1=0.9828, 513 ms
+14:50:55  INFO  POST /predict from 127.0.0.1 -> 200 (560 ms)
+INFO:     127.0.0.1:60834 - "POST /predict HTTP/1.1" 200 OK
+14:50:55  INFO  predict trip 00000077: running pipeline
+14:50:55  INFO  predict trip 00000077: 3911 points, 359 route arcs, top1=0.9021, route_f1=0.9859, 388 ms
+14:50:55  INFO  POST /predict from 127.0.0.1 -> 200 (458 ms)
+INFO:     127.0.0.1:60836 - "POST /predict HTTP/1.1" 200 OK
+14:50:55  INFO  predict trip 00000091: running pipeline
+14:50:55  INFO  predict trip 00000091: 874 points, 235 route arcs, top1=0.9554, route_f1=0.9944, 145 ms
+14:50:55  INFO  POST /predict from 127.0.0.1 -> 200 (170 ms)
+INFO:     127.0.0.1:60838 - "POST /predict HTTP/1.1" 200 OK
+14:51:22  INFO  GET /health from 127.0.0.1 -> 200 (1 ms)
+INFO:     127.0.0.1:60875 - "GET /health HTTP/1.1" 200 OK
+14:51:22  INFO  GET /trips from 127.0.0.1 -> 200 (0 ms)
+INFO:     127.0.0.1:60877 - "GET /trips HTTP/1.1" 200 OK
+14:51:22  INFO  predict trip 00000040: running pipeline
+14:51:23  INFO  predict trip 00000040: 2995 points, 327 route arcs, top1=0.9793, route_f1=0.9996, 237 ms
+14:51:23  INFO  POST /predict from 127.0.0.1 -> 200 (299 ms)
+INFO:     127.0.0.1:60879 - "POST /predict HTTP/1.1" 200 OK
+14:52:09  INFO  GET /health from 127.0.0.1 -> 200 (3 ms)
+INFO:     127.0.0.1:60918 - "GET /health HTTP/1.1" 200 OK
+14:52:09  INFO  GET /trips from 127.0.0.1 -> 200 (0 ms)
+INFO:     127.0.0.1:60920 - "GET /trips HTTP/1.1" 200 OK
+14:52:09  INFO  predict trip 00000000: running pipeline
+14:52:09  INFO  predict trip 00000000: 2503 points, 196 route arcs, top1=0.9804, route_f1=0.9969, 219 ms
+14:52:09  INFO  POST /predict from 127.0.0.1 -> 200 (264 ms)
+INFO:     127.0.0.1:60922 - "POST /predict HTTP/1.1" 200 OK
+14:52:09  INFO  predict trip 00000007: running pipeline
+14:52:09  INFO  predict trip 00000007: 1354 points, 121 route arcs, top1=1.0000, route_f1=0.9965, 72 ms
+14:52:09  INFO  POST /predict from 127.0.0.1 -> 200 (94 ms)
+INFO:     127.0.0.1:60924 - "POST /predict HTTP/1.1" 200 OK
+14:52:09  INFO  predict trip 00000009: running pipeline
+14:52:09  INFO  predict trip 00000009: 1049 points, 446 route arcs, top1=0.9209, route_f1=0.9733, 231 ms
+14:52:09  INFO  POST /predict from 127.0.0.1 -> 200 (262 ms)
+INFO:     127.0.0.1:60926 - "POST /predict HTTP/1.1" 200 OK
+14:52:09  INFO  predict trip 00000040: running pipeline
+14:52:10  INFO  predict trip 00000040: 2995 points, 327 route arcs, top1=0.9793, route_f1=0.9996, 219 ms
+14:52:10  INFO  POST /predict from 127.0.0.1 -> 200 (282 ms)
+INFO:     127.0.0.1:60928 - "POST /predict HTTP/1.1" 200 OK
+14:52:10  INFO  predict trip 00000052: running pipeline
+14:52:10  INFO  predict trip 00000052: 262 points, 93 route arcs, top1=1.0000, route_f1=0.9984, 32 ms
+14:52:10  INFO  POST /predict from 127.0.0.1 -> 200 (42 ms)
+INFO:     127.0.0.1:60930 - "POST /predict HTTP/1.1" 200 OK
+14:52:10  INFO  predict trip 00000056: running pipeline
+14:52:10  INFO  predict trip 00000056: 3958 points, 1339 route arcs, top1=0.9661, route_f1=0.9860, 459 ms
+14:52:10  INFO  POST /predict from 127.0.0.1 -> 200 (642 ms)
+INFO:     127.0.0.1:60932 - "POST /predict HTTP/1.1" 200 OK
+14:52:10  INFO  predict trip 00000065: running pipeline
+14:52:11  INFO  predict trip 00000065: 768 points, 151 route arcs, top1=0.8932, route_f1=0.9912, 127 ms
+14:52:11  INFO  POST /predict from 127.0.0.1 -> 200 (146 ms)
+INFO:     127.0.0.1:60942 - "POST /predict HTTP/1.1" 200 OK
+14:52:11  INFO  predict trip 00000076: running pipeline
+14:52:11  INFO  predict trip 00000076: 1486 points, 400 route arcs, top1=0.9818, route_f1=0.9828, 551 ms
+14:52:11  INFO  POST /predict from 127.0.0.1 -> 200 (598 ms)
+INFO:     127.0.0.1:60949 - "POST /predict HTTP/1.1" 200 OK
+14:52:11  INFO  predict trip 00000077: running pipeline
+14:52:12  INFO  predict trip 00000077: 3911 points, 359 route arcs, top1=0.9021, route_f1=0.9859, 395 ms
+14:52:12  INFO  POST /predict from 127.0.0.1 -> 200 (464 ms)
+INFO:     127.0.0.1:60960 - "POST /predict HTTP/1.1" 200 OK
+14:52:12  INFO  predict trip 00000091: running pipeline
+14:52:12  INFO  predict trip 00000091: 874 points, 235 route arcs, top1=0.9554, route_f1=0.9944, 126 ms
+14:52:12  INFO  POST /predict from 127.0.0.1 -> 200 (149 ms)
+INFO:     127.0.0.1:60962 - "POST /predict HTTP/1.1" 200 OK
+14:52:12  INFO  POST /predict from 127.0.0.1 -> 404 (0 ms)
+INFO:     127.0.0.1:60966 - "POST /predict HTTP/1.1" 404 Not Found

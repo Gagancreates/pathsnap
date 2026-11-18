@@ -200,17 +200,27 @@ def main():
 
 
 def figures(grid: pd.DataFrame, summary: pd.DataFrame, per_trip: pd.DataFrame):
-    g = grid[grid.gap_s == grid.loc[grid.top1.idxmax()].gap_s]
+    # stage 1: alpha x beta at the initial gap_s; stage 2: gap_s sweep at the best (alpha, beta)
+    g = grid[grid.gap_s == grid.gap_s.mode()[0]].drop_duplicates(["alpha", "beta"])
     piv = g.pivot(index="alpha", columns="beta", values="top1")
-    fig, ax = plt.subplots(figsize=(6.5, 4))
+    best = grid.loc[grid.top1.idxmax()]
+    sweep = grid[(grid.alpha == best.alpha) & (grid.beta == best.beta)].sort_values("gap_s")
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(11, 4), gridspec_kw={"width_ratios": [1.4, 1]})
     im = ax.imshow(piv.values, cmap="viridis", aspect="auto")
     ax.set_xticks(range(piv.shape[1]), piv.columns); ax.set_yticks(range(piv.shape[0]), piv.index)
     for i in range(piv.shape[0]):
         for j in range(piv.shape[1]):
             ax.text(j, i, f"{piv.values[i, j]:.4f}", ha="center", va="center", color="w", fontsize=9)
     ax.set(xlabel="beta (transition scale, m)", ylabel="alpha (emission weight)",
-           title="Decoder grid: Top-1 on train OOF")
-    fig.colorbar(im); fig.tight_layout(); fig.savefig(FIGURES_DIR / (FIG_PREFIX + "decoder_grid.png"), dpi=130); plt.close(fig)
+           title=f"Stage 1: alpha x beta (gap_s = {g.gap_s.iloc[0]:.0f} s)")
+    fig.colorbar(im, ax=ax)
+    ax2.plot(sweep.gap_s, sweep.top1, "o-")
+    for x, y in zip(sweep.gap_s, sweep.top1):
+        ax2.annotate(f"{y:.4f}", (x, y), textcoords="offset points", xytext=(0, 6), ha="center", fontsize=8)
+    ax2.set(xlabel="gap_s (s)", ylabel="Top-1", title=f"Stage 2: gap_s (alpha {best.alpha:g}, beta {best.beta:g})")
+    ax2.grid(alpha=0.3)
+    fig.suptitle("Decoder grid search: Top-1 on train OOF"); fig.tight_layout()
+    fig.savefig(FIGURES_DIR / (FIG_PREFIX + "decoder_grid.png"), dpi=130); plt.close(fig)
 
     metrics = ["top1", "continuity", "route_f1"]
     fig, axes = plt.subplots(1, 2, figsize=(13, 4.3))

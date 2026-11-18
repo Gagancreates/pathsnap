@@ -48,6 +48,8 @@ Or run individual steps:
 | 5. Bayesian HPO | `python scripts/05_bayesian_hpo.py --trials 40` (resumable) | `experiments/results/phase5/`, `reports/figures/hpo_*.png`, `cache/{preds,models}/xgb_{tuned,untuned}*` |
 | 6. HMM + Viterbi | `python scripts/06_hmm_viterbi.py --model xgb_untuned --maps` (also `--model xgb_tuned`) | `experiments/results/phase6/<model>/`, `reports/figures/hmm_*.png`, `reports/maps/hmm_trip_*.html` |
 | 7. Export artifacts | `python scripts/07_export_artifacts.py` | `artifacts/xgb_final.json`, `artifacts/pipeline_config.json`, `experiments/results/phase7/verification.csv` |
+| 8. Integration test | `python scripts/08_integration_test.py --api http://<laptop-1-ip>:8000` (API running) | `experiments/results/phase10/integration.csv` |
+| 9. Report | `python scripts/09_build_report.py` (needs Google Chrome for the PDF) | `reports/report.html`, `reports/PathSnap_Report.pdf` |
 
 ## API (Laptop 1)
 
@@ -62,6 +64,24 @@ PATHSNAP_EVAL_DIR=data/eval_test uvicorn api.main:app --host 0.0.0.0 --port 8000
 - `POST /predict` with `{"trip_id": "..."}` — runs the full pipeline and returns GPS points, the predicted route as `[lat, lon]` polylines, server-side metrics (Top-1, route precision/recall/F1, continuity) and timings. The reference route is never returned.
 
 Every request is logged to the console (time, endpoint, client IP, status, latency, per-trip metrics). For development, point it at `data/student_test`. Find Laptop 1's LAN IP with `ipconfig getifaddr en0` (macOS) and allow incoming connections on port 8000 if the firewall asks.
+
+## UI (Laptop 2)
+
+The UI only talks to the API over HTTP; it needs `streamlit`, `streamlit-folium`, `folium`, `requests`, `pandas` and no data.
+
+```bash
+PATHSNAP_API=http://<laptop-1-ip>:8000 streamlit run ui/app.py --server.address 0.0.0.0
+```
+
+- Sidebar: API URL and connection status (`/health`).
+- **Single trip:** choose one of the trips listed by `/trips`, press *Match trip*; shows Top-1, route F1/precision/recall, continuity, timings and a Folium map (GPS points, predicted route, layer control, legend).
+- **All trips:** runs every trip through `/predict` and shows the per-trip table and pooled Top-1.
+
+## Demo day checklist
+
+1. Laptop 1: copy the 10 evaluation trip folders to `data/eval_test/`, start the API (above), note its IP.
+2. Laptop 2: start the UI with `PATHSNAP_API` pointing at Laptop 1; check the sidebar says *Connected · 10 trips*.
+3. Keep the Laptop 1 terminal visible: every UI click shows up there as `POST /predict … -> 200` with the trip's metrics.
 
 ## Repository layout
 
