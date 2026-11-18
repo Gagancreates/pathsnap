@@ -21,7 +21,7 @@ Update this file in the same commit as the work. Status: ⬜ todo · 🟡 in pro
 | 3 | Feature engineering | ✅ | Gagan | `scripts/03_features.py`; 26 features, 1.34M train / 147k test rows |
 | 4 | Model experiments (≥5) | ✅ | Gagan | 8 models, 7 families; **XGBoost selected** |
 | 5 | Bayesian HPO | ✅ | Gagan | Optuna TPE, 40 trials; gain within noise |
-| 6 | HMM + Viterbi | ⬜ | | |
+| 6 | HMM + Viterbi | ✅ | Gagan | Top-1 0.897 → **0.955** on student_test; final = untuned XGB + HMM |
 | 7 | Artifacts | ⬜ | | |
 | 8 | FastAPI backend | ⬜ | | |
 | 9 | UI | ⬜ | | |
@@ -43,6 +43,9 @@ Update this file in the same commit as the work. Status: ⬜ todo · 🟡 in pro
 | 2026-11-18 | CV = 5-fold GroupKFold by trip (shuffle, seed 42) on 78 reliable trips; same folds reused in Phases 5–6 (`experiment.cv_splits`) | no trip leaks between fit and validation; identical folds make tuned/untuned comparable |
 | 2026-11-18 | **Final model family: XGBoost** | best CV macro-F1 (0.9369), CV Top-1 (0.8863), test Top-1 (0.8970) and lowest log loss (CV 0.082, test 0.073) — calibrated probabilities matter because they become HMM emissions; fast inference (3.9 ms / 1k points). LightGBM within noise but its validation loss rises after ~150 rounds |
 | 2026-11-18 | Bayesian HPO: Optuna TPE (seed 42, 10 random start-up trials, median pruner), objective = mean CV Top-1 on the Phase 4 folds, trial 0 = untuned config | objective matches the primary metric; same folds keep tuned vs untuned comparable; student_test untouched during search |
+| 2026-11-18 | HMM: states = candidate arcs; emission = alpha·log P(classifier); transition = −|route dist − GPS dist|/beta (Newson–Krumm), directed bounded Dijkstra ≤ 1 km; unreachable → −30; gap > gap_s → uniform transition (chain split); points without candidates skipped | uses the classifier's calibrated probabilities and the road graph's direction/connectivity; never dead-ends |
+| 2026-11-18 | Decoder params tuned on train out-of-fold predictions only: alpha 1.0, beta 2.0 m, gap_s 120 s | grid of 12 (alpha × beta) + 3 gap values; student_test only scored afterwards |
+| 2026-11-18 | **Final pipeline = untuned XGBoost + HMM** | after decoding, untuned beats tuned on train OOF Top-1 (0.9323 vs 0.9312) — the selection set — and student_test agrees (0.9552 vs 0.9528); also 2× faster inference and better log loss |
 | 2026-11-18 | Missing heading (stationary, <2 m move) → `heading_cos=0`, `heading_diff=90`, `heading_valid=0`; edge neighbours clipped | neutral fill works for every model family (LogReg/KNN/MLP can't take NaN) |
 
 ## Data-quality findings
@@ -111,6 +114,22 @@ Observations: every model beats the 0.826 rule baseline; fold-to-fold Top-1 spre
 
 Tuning did **not** meaningfully outperform: +0.08 pp CV Top-1 (fold std ±3.4 pp), test level, log loss slightly worse, inference 2× slower. The search surface is flat — the classifier is limited by features/ambiguity, not hyperparameters. Both are carried into Phase 6 to compare after decoding.
 
+**Phase 6 — HMM + Viterbi** (`experiments/results/phase6/<model>/`, figures `reports/figures/hmm_*.png`, maps `reports/maps/hmm_trip_*.html`)
+
+| Classifier | Decoding | Train OOF Top-1 | Test Top-1 | Test continuity | Test route F1 (len-weighted) | Unbridged route gaps (test) |
+|---|---|---|---|---|---|---|
+| XGB untuned | classifier only | 0.8850 | 0.8970 | 0.9414 | 0.8893 | 175 |
+| **XGB untuned** | **+ HMM** | **0.9323** | **0.9552** | **0.9840** | **0.9905** | **6** |
+| XGB tuned | classifier only | 0.8858 | 0.8968 | 0.9418 | 0.8920 | 166 |
+| XGB tuned | + HMM | 0.9312 | 0.9528 | 0.9838 | 0.9889 | 6 |
+
+- HMM improved Top-1 on all 10 student_test trips (largest: 00000077 0.775 → 0.902; two trips reach 100%). Route precision jumps 0.81 → 0.98: classifier-only routes contain many stray arcs.
+- HMM hurt on 4 of 78 train trips, by ≤ 1.1 pp (worst 00000075 0.872 → 0.861): places where wrong-but-connected roads beat the classifier's correct pick.
+- Smaller beta (trust GPS displacement more) was consistently better; alpha 1 (plain log-probabilities) best; gap threshold barely matters (only a few trips have gaps).
+- Remaining errors: trips 00000065 / 00000009 (~0.89–0.92) — dense junctions and parallel roads.
+
+Note: `hmm_*.png` = tuned run, `hmm_xgb_untuned_*.png` = final model; maps are from the final model.
+
 K=2/4 miss a lot because every two-way street contributes two arcs (one per direction) at identical distance — direction must be decided by features (heading), not distance.
 
 ## Log
@@ -121,3 +140,4 @@ K=2/4 miss a lot because every two-way street contributes two arcs (one per dire
 - **2026-11-18** — Phase 3 done: `features.py` (26 inference-safe features), feature tables cached as parquet (~15 s for all 90 trips), univariate AUC / class-distribution / correlation figures, rule-based baselines. Next: Phase 4 model experiments.
 - **2026-11-18** — Phase 4 done: `models.py` (8-model zoo, loss histories for LGBM/XGB/MLP), `metrics.py`, `experiment.py`, `04_model_experiments.py` + `04b_model_plots.py`; XGBoost selected. Phase 5 search launched.
 - **2026-11-18** — Phase 5 done: `05_bayesian_hpo.py` (Optuna study in `optuna_xgb.db`, trials.csv, importance, tuned-vs-untuned). Tuning gain within noise. Phase 6 running for both models.
+- **2026-11-18** — Phase 6 done: `hmm.py` (bounded Dijkstra route graph, lattice, Viterbi, route reconstruction, route overlap), `06_hmm_viterbi.py` (OOF predictions, decoder grid, classifier-vs-HMM, maps). Final pipeline = untuned XGBoost + HMM. Next: Phase 7 artifacts + Phase 8 API.

@@ -8,7 +8,8 @@ from scipy.spatial import cKDTree
 from .io import Trip
 from .network import RoadNetwork
 
-COLORS = {"gps": "#1f6feb", "network": "#9aa0a6", "reference": "#1a7f37", "predicted": "#d1242f"}
+COLORS = {"gps": "#1f6feb", "network": "#9aa0a6", "reference": "#1a7f37", "predicted": "#d1242f",
+          "classifier": "#bf8700"}
 
 _LEGEND = """
 <div style="position:fixed;bottom:24px;left:24px;z-index:9999;background:white;padding:8px 12px;
@@ -52,7 +53,8 @@ def _route_polyline(trip: Trip, arc_ids) -> list[tuple[float, float]]:
 
 
 def trip_map(trip: Trip, net: RoadNetwork | None = None, predicted_arcs=None, show_reference: bool = True,
-             show_network: bool = True, max_gps_points: int = 3000, title: str | None = None) -> folium.Map:
+             show_network: bool = True, max_gps_points: int = 3000, title: str | None = None,
+             classifier_arcs=None, predicted_label: str = "Predicted route") -> folium.Map:
     net = net or RoadNetwork.from_trip(trip)
     tr = trip.track
     m = folium.Map(tiles="OpenStreetMap", control_scale=True)
@@ -73,10 +75,17 @@ def trip_map(trip: Trip, net: RoadNetwork | None = None, predicted_arcs=None, sh
         fg.add_to(m)
         layers.append("reference")
 
+    if classifier_arcs is not None:
+        fg = folium.FeatureGroup("Classifier-only route", show=False)
+        folium.PolyLine(_route_polyline(trip, classifier_arcs), color=COLORS["classifier"], weight=3,
+                        opacity=0.9, dash_array="6 4", tooltip="Classifier-only route").add_to(fg)
+        fg.add_to(m)
+        layers.append("classifier")
+
     if predicted_arcs is not None:
-        fg = folium.FeatureGroup("Predicted route", show=True)
+        fg = folium.FeatureGroup(predicted_label, show=True)
         folium.PolyLine(_route_polyline(trip, predicted_arcs), color=COLORS["predicted"], weight=3.5,
-                        opacity=0.9, tooltip="Predicted route").add_to(fg)
+                        opacity=0.9, tooltip=predicted_label).add_to(fg)
         fg.add_to(m)
         layers.append("predicted")
 
