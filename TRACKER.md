@@ -9,7 +9,7 @@ Update this file in the same commit as the work. Status: ⬜ todo · 🟡 in pro
 | Gagan | @Gagancreates | setup, data pipeline |
 | Dhruv Purushotham | @dhruvpurushotham1718-ui | Dataset Documentation |
 | Dheepak Seetharam | @ds610 | pipeline automation, modeling |
-| TBD | | |
+| Gandhar Gokhale | @GGO4411 | Documentation, Validation, Frontend-API integration  |
 
 ## Phase status
 
