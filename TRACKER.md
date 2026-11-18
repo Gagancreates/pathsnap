@@ -18,7 +18,7 @@ Update this file in the same commit as the work. Status: ⬜ todo · 🟡 in pro
 | 0 | Setup | ✅ | Gagan | repo, env, plan, tracker |
 | 1 | Data loading + EDA | ✅ | Gagan | `scripts/01_eda.py` → inventory, summary, 5 figures, 5 Folium maps |
 | 2 | Labels + candidates | ✅ | Gagan | `scripts/02_labels_candidates.py`; R=50 m, K=12; 2 trips flagged unreliable |
-| 3 | Feature engineering | ⬜ | | |
+| 3 | Feature engineering | ✅ | Gagan | `scripts/03_features.py`; 26 features, 1.34M train / 147k test rows |
 | 4 | Model experiments (≥5) | ⬜ | | |
 | 5 | Bayesian HPO | ⬜ | | |
 | 6 | HMM + Viterbi | ⬜ | | |
@@ -38,6 +38,9 @@ Update this file in the same commit as the work. Status: ⬜ todo · 🟡 in pro
 | 2026-11-18 | Candidates: arcs within **R = 50 m**, nearest **K = 12** | train-reliable miss 1.57%, student_test 0.21%, ~7 candidates/point; R=75 only saves ~0.5 pp train miss for +20% candidates (`candidate_miss_rate.csv`) |
 | 2026-11-18 | Trips with median point→label distance > 50 m are **unreliable** → excluded from training, kept in reporting | rule flags exactly 00000033, 00000054 (next-worst median is 11 m); their labels are 120–140 m off the GPS |
 | 2026-11-18 | Folium base map = OpenStreetMap tiles | CartoDB tiles now require an API key |
+| 2026-11-18 | Problem framed as **binary candidate classification** (is this candidate the reference arc?), Top-1 = argmax score per point | fixed-size label space doesn't exist (arc ids are per-trip); gives P(arc) per candidate = HMM emission |
+| 2026-11-18 | Features exclude lon/lat, timestamps, trip ids | prevent memorising locations; same code runs in API at inference |
+| 2026-11-18 | Missing heading (stationary, <2 m move) → `heading_cos=0`, `heading_diff=90`, `heading_valid=0`; edge neighbours clipped | neutral fill works for every model family (LogReg/KNN/MLP can't take NaN) |
 
 ## Data-quality findings
 
@@ -72,6 +75,13 @@ Source of truth: `experiments/results/`.
 | student_test | **50** | 2.87 | 0.40 | **0.21** | 0.17 | 0.14 | **7.7** |
 | student_test | 75 | 2.85 | 0.37 | 0.18 | 0.14 | 0.11 | 9.0 |
 
+**Phase 3 — feature table** (`feature_table_stats.json`, `feature_univariate.csv`, `heuristic_baselines.csv`)
+
+- Rows: train 1,342,714 (reliable trips: 1,276,667), student_test 146,896; ~7 candidates/point; positive rate ≈ 13–14%.
+- Strongest single features (train, |2·AUC−1|): `dist_minus_min` 0.82, `rank` 0.81, `dist_ratio` 0.80, `dist_win5_mean` 0.74, `dist` 0.72, `heading_cos_wide` 0.69, `at_endpoint` 0.66.
+- Point-level context features (`speed`, `dt_*`, `min_dist`, `second_gap`) are ~0.5 alone — they only help through interactions.
+- Rule-based Top-1 (no learning, all GPS points): nearest arc **49.5% train / 53.7% test** (two-way twins tie); nearest + heading **72.1% / 82.6%**. ML models must beat these.
+
 K=2/4 miss a lot because every two-way street contributes two arcs (one per direction) at identical distance — direction must be decided by features (heading), not distance.
 
 ## Log
@@ -79,3 +89,4 @@ K=2/4 miss a lot because every two-way street contributes two arcs (one per dire
 - **2026-11-18** — Repo scaffolded, plan written, environment set up.
 - **2026-11-18** — Phase 1 done: loaders (`io.py`), per-trip projection (`geo.py`), network stats (`network.py`), Folium builder (`viz.py`), EDA script + outputs. Next: Phase 2 labels + candidates.
 - **2026-11-18** — Phase 2 done: `labels.py` (monotone DP alignment, ~0.3 s/trip), `candidates.py` (KD-tree over ≤20 m arc pieces, verified identical to brute force), miss-rate grid + figures, label-assignment map (`reports/maps/labels_trip_00000095.html`). Next: Phase 3 features.
+- **2026-11-18** — Phase 3 done: `features.py` (26 inference-safe features), feature tables cached as parquet (~15 s for all 90 trips), univariate AUC / class-distribution / correlation figures, rule-based baselines. Next: Phase 4 model experiments.
