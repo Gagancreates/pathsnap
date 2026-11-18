@@ -25,8 +25,8 @@ Update this file in the same commit as the work. Status: ⬜ todo · 🟡 in pro
 | 7 | Artifacts | ✅ | Gagan | `artifacts/xgb_final.json` + `pipeline_config.json`; raw-file run reproduces 0.9552 |
 | 8 | FastAPI backend | ✅ | Gagan | `/health`, `/trips`, `/predict`; tested on all 10 student_test trips |
 | 9 | UI | ✅ | Gagan | `ui/app.py` (Streamlit + Folium): trip list from `/trips`, single-trip map + metrics, all-trips table |
-| 10 | Integration test | 🟡 | Gagan | single-machine dry run over HTTP: 10/10 trips, pooled Top-1 0.9552 (`08_integration_test.py`); real two-laptop LAN run still to do |
-| 11 | Report | ✅ | Gagan | `09_build_report.py` → `reports/PathSnap_Report.pdf` (25 pages); fill team name + SRNs, swap in live demo screenshots |
+| 10 | Integration test | ✅ | Gagan, Gandhar | HTTP test 10/10 (`08_integration_test.py`); real two-laptop run over Tailscale (API on Laptop 1, UI on Laptop 2): 10/10 trips, pooled Top-1 0.9552 |
+| 11 | Report | ✅ | Gagan | `09_build_report.py` → `reports/PathSnap_Report.pdf` (26 pages), team details and two-laptop screenshots included; slides PDF in `reports/` |
 
 ## Decisions log
 
@@ -50,6 +50,7 @@ Update this file in the same commit as the work. Status: ⬜ todo · 🟡 in pro
 | 2026-11-18 | API never returns the reference route — only metrics; prediction loads trips with `with_route=False`, scoring reads `.route` afterwards | brief: ground truth must stay server-side and never reach the model or UI |
 | 2026-11-18 | UI shows GPS + predicted route only, **no reference layer** (PLAN listed one) | brief: ground truth must never reach the UI; the API returns metrics only |
 | 2026-11-18 | UI is a pure HTTP client (`requests` + Streamlit), no `pathsnap` import, no trip files | Laptop 2 must not be able to bypass the API |
+| 2026-11-18 | Two-laptop link over **Tailscale** (personal tailnet, machine shared to Laptop 2) | fixed address independent of venue Wi-Fi; client isolation on campus/hotspot networks can block LAN traffic |
 | 2026-11-18 | Report built by a script from result CSVs (HTML → Chrome headless PDF) | every number in the PDF traceable to `experiments/results/` |
 | 2026-11-18 | Missing heading (stationary, <2 m move) → `heading_cos=0`, `heading_diff=90`, `heading_valid=0`; edge neighbours clipped | neutral fill works for every model family (LogReg/KNN/MLP can't take NaN) |
 
@@ -148,3 +149,4 @@ K=2/4 miss a lot because every two-way street contributes two arcs (one per dire
 - **2026-11-18** — Phase 6 done: `hmm.py` (bounded Dijkstra route graph, lattice, Viterbi, route reconstruction, route overlap), `06_hmm_viterbi.py` (OOF predictions, decoder grid, classifier-vs-HMM, maps). Final pipeline = untuned XGBoost + HMM. Next: Phase 7 artifacts + Phase 8 API.
 - **2026-11-18** — Phases 7–8 done: `pipeline.py` (raw files → features → XGBoost → HMM → route; separate server-side scoring), `07_export_artifacts.py` (end-to-end check reproduces student_test Top-1 0.9552, 33–512 ms/trip), `api/main.py` (FastAPI with request logging). Next: Phase 9 UI.
 - **2026-11-18** — Phases 9–11: `ui/app.py`, `08_integration_test.py` (10/10 trips over HTTP, 404 for unknown id, pooled Top-1 0.9552), report builder + PDF, UI/API screenshots in `reports/screenshots/`. Fixed decoder-grid figure (was plotting only the final gap_s slice). Next: two-laptop LAN dry run, fill team details in report.
+- **2026-11-18** — Two-laptop run done over Tailscale: Laptop 2 UI → Laptop 1 API, 10/10 trips, pooled Top-1 0.9552; screenshots + Laptop 1 log in report §7. UI legend given explicit dark text (was faint in dark theme). Final-review slides exported to `reports/PathSnap_Final_Review_Slides.pdf`.

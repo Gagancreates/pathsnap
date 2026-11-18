@@ -19,8 +19,9 @@ RES = REPO / "experiments" / "results"
 REP = REPO / "reports"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
-TEAM = "[Team name]"
-MEMBERS = ["Gagan [SRN]", "Dhruv Purushotham [SRN]", "Dheepak Seetharam [SRN]", "[Member 4] [SRN]"]
+TEAM = "Team 44"
+MEMBERS = ["Gagan P · PES1UG24CS166", "Gandhar Gokhale · PES1UG24CS167", "Dhruv Purushotham · PES1UG24CS154",
+           "Dheepak Seetharam · PES1UG24CS152"]
 REPO_URL = "https://github.com/Gagancreates/pathsnap"
 
 # ------------------------------------------------------------------ data
@@ -531,9 +532,19 @@ trips. All <b>{int((integ.status == 200).sum())}/{len(integ)}</b> trips succeede
 in any response.</p>
 {table(integ_tab)}
 <p class="src">Table 7.1 — experiments/results/phase10/integration.csv</p>
-{fig("screenshots/ui_trip_00000040.jpg", "Figure 7.1 — Evaluator UI (Laptop 2), single-trip view: server-side metrics, timings and predicted route.", 95)}
-{fig("screenshots/ui_all_trips.jpg", "Figure 7.2 — Evaluator UI, all-trips view: 10/10 trips succeeded, pooled Top-1 95.52%.", 95)}
-{fig("screenshots/api_console_log.jpg", "Figure 7.3 — API console on the receiving laptop showing the /health, /trips and /predict requests with per-trip results (captured log: experiments/logs/phase10_api.log).", 100)}
+<p><b>Two-laptop run.</b> We then ran the real setup on two separate laptops connected over Tailscale (a private VPN
+that gives each laptop a fixed address, so the demo does not depend on the venue Wi-Fi):</p>
+<ul>
+<li>Laptop 1 (macOS) ran the API at <code>http://100.87.111.15:8000</code>.</li>
+<li>Laptop 2 ran the UI from a fresh clone of the repository, pointed at that address.</li>
+</ul>
+<p>From Laptop 2, single trips and the "Evaluate all trips" run all succeeded, 10/10 trips, with pooled Top-1 95.52%
+and mean route F1 0.9905. These are the same per-trip numbers as Table 7.1. Laptop 1's console logged every request
+with Laptop 2's address (100.124.152.77), as shown in Figure 7.4.</p>
+{fig("screenshots/laptop2_ui_trip_00000000.jpg", "Figure 7.1 — Evaluator UI running on Laptop 2, connected to the API on Laptop 1: single-trip view of trip 00000000 with server-side metrics, timings and the predicted route.", 95)}
+{fig("screenshots/laptop2_ui_trip_00000052.jpg", "Figure 7.2 — Laptop 2, trip 00000052: Folium map with GPS observations, predicted route, layer control and legend.", 95)}
+{fig("screenshots/laptop2_ui_all_trips.jpg", "Figure 7.3 — Laptop 2, all-trips view: 10/10 trips succeeded, pooled Top-1 95.52%, mean route F1 99.05%; the decoder settings received from /health are shown in the sidebar.", 95)}
+{fig("screenshots/laptop1_api_log_two_laptops.jpg", "Figure 7.4 — Laptop 1 API console during the all-trips run from Laptop 2: every /predict request from 100.124.152.77 with the trip's metrics and latency (experiments/logs/phase10_api.log).", 90)}
 
 <h2>8. Conclusions</h2>
 <ul>

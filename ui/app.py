@@ -58,7 +58,7 @@ def build_map(res: dict) -> folium.Map:
     g_route.add_to(m)
     folium.LayerControl(collapsed=False).add_to(m)
     legend = (f'<div style="position:fixed;top:84px;left:12px;z-index:9999;background:white;padding:8px 10px;'
-              f'border:1px solid #999;border-radius:6px;font:13px sans-serif">'
+              f'border:1px solid #999;border-radius:6px;font:13px sans-serif;color:#1a1a1a;opacity:1">'
               f'<span style="color:{GPS_COLOR}">●</span> GPS observation<br>'
               f'<span style="color:{ROUTE_COLOR}">━</span> Predicted route</div>')
     m.get_root().html.add_child(folium.Element(legend))
