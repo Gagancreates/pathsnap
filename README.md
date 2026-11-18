@@ -30,6 +30,15 @@ Each trip contains four header-less, whitespace-separated files:
 
 ## Run
 
+To run the complete pipeline end-to-end:
+
+```bash
+bash run_all.sh                             # runs all steps (Phases 1-4)
+bash run_all.sh --models xgb,lgbm           # or pass flags to run a model subset
+```
+
+Or run individual steps:
+
 | Step | Command | Output |
 |------|---------|--------|
 | 1. EDA | `python scripts/01_eda.py` | `experiments/results/eda_*`, `reports/figures/eda_*.png`, `reports/maps/eda_trip_*.html` |
